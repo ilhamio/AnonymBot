@@ -19,7 +19,7 @@ async def search_callback(cbq: types.CallbackQuery):
     await cbq.answer()
     if db.add_to_queue(cbq.message.chat.id):
         await cbq.message.edit_reply_markup(None)
-        await cbq.message.answer("Собеседник найден!")
+        await cbq.message.edit_text("<b>Собеседник найден!</b>")
     else:
         await cbq.message.edit_reply_markup(cancel_menu)
 
@@ -29,8 +29,8 @@ async def search_callback(cbq: types.CallbackQuery):
 async def cancel_callback(cbq: types.CallbackQuery):
     await cbq.answer()
     db.delete_from_queue(cbq.message.chat.id)
-    await cbq.message.edit_text("<b>Здесь ничего не было!</b>")
     await cbq.message.edit_reply_markup(None)
+    await cbq.message.edit_text("<b>Здесь ничего не было!</b>")
 
 
 @dispatcher.message_handler()

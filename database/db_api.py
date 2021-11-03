@@ -22,7 +22,7 @@ class Database:
             self.cursor.execute("UPDATE 'users' SET 'companion'=? WHERE chat_id=?", (chat_id, peek[0]))
 
     # Check for duplicate
-    def _find_value(self, chat_id, db) -> bool:
+    def find_value(self, chat_id, db) -> bool:
         with self.conn:
             temp = self.cursor.execute(f"SELECT * FROM '{db}' WHERE chat_id=?", (chat_id,)).fetchall()
             return bool(len(temp))
@@ -31,11 +31,16 @@ class Database:
     # ========= OPERATIONS WITH USERS =========
     # Add to users while first start
     def add_to_users(self, chat_id):
-        if not self._find_value(chat_id, 'users'):
-            self.cursor.execute("INSERT INTO 'users' ('chat_id') VALUES (?)", (chat_id,))
+        with self.conn:
+            if not self.find_value(chat_id, 'users'):
+                self.cursor.execute("INSERT INTO 'users' ('chat_id') VALUES (?)", (chat_id,))
 
     def get_companion(self, chat_id):
-        return self.cursor.execute("SELECT companion FROM 'users' WHERE chat_id=?", (chat_id,)).fetchone()
+        companion = self.cursor.execute("SELECT companion FROM 'users' WHERE chat_id=?", (chat_id,)).fetchone()
+        if companion:
+            return companion[0]
+        else:
+            return None
 
     def close_chat(self, chat_id):
         self.cursor.execute("UPDATE 'users' SET companion=NULL WHERE chat_id=?", (chat_id,))
